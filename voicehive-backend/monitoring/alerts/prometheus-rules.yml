@@ -1,0 +1,172 @@
+groups:
+- name: voicehive.rules
+  rules:
+  # High Error Rate Alert
+  - alert: HighErrorRate
+    expr: rate(voicehive_calls_total{status="error"}[5m]) / rate(voicehive_calls_total[5m]) * 100 > 5
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value }}% which is above the 5% threshold"
+
+  # Low Success Rate Alert
+  - alert: LowSuccessRate
+    expr: rate(voicehive_calls_total{status="success"}[5m]) / rate(voicehive_calls_total[5m]) * 100 < 90
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low success rate detected"
+      description: "Success rate is {{ $value }}% which is below the 90% threshold"
+
+  # High API Response Time
+  - alert: HighAPIResponseTime
+    expr: histogram_quantile(0.95, rate(voicehive_api_response_time_seconds_bucket[5m])) > 2
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High API response time"
+      description: "95th percentile API response time is {{ $value }}s which is above 2s threshold"
+
+  # Critical API Response Time
+  - alert: CriticalAPIResponseTime
+    expr: histogram_quantile(0.95, rate(voicehive_api_response_time_seconds_bucket[5m])) > 5
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Critical API response time"
+      description: "95th percentile API response time is {{ $value }}s which is above 5s threshold"
+
+  # High Memory Usage
+  - alert: HighMemoryUsage
+    expr: voicehive_system_memory_usage_percent > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High memory usage"
+      description: "Memory usage is {{ $value }}% which is above 80% threshold"
+
+  # Critical Memory Usage
+  - alert: CriticalMemoryUsage
+    expr: voicehive_system_memory_usage_percent > 90
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Critical memory usage"
+      description: "Memory usage is {{ $value }}% which is above 90% threshold"
+
+  # High CPU Usage
+  - alert: HighCPUUsage
+    expr: voicehive_system_cpu_usage_percent > 80
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage"
+      description: "CPU usage is {{ $value }}% which is above 80% threshold"
+
+  # Service Down
+  - alert: ServiceDown
+    expr: up{job="voicehive"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "VoiceHive service is down"
+      description: "VoiceHive service has been down for more than 1 minute"
+
+  # Too Many Active Calls
+  - alert: TooManyActiveCalls
+    expr: voicehive_active_calls > 50
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Too many active calls"
+      description: "There are {{ $value }} active calls which is above the 50 call threshold"
+
+  # Long Call Duration
+  - alert: LongCallDuration
+    expr: histogram_quantile(0.95, rate(voicehive_call_duration_seconds_bucket[5m])) > 600
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Calls taking too long"
+      description: "95th percentile call duration is {{ $value }}s which is above 10 minutes"
+
+  # No Calls Processed
+  - alert: NoCallsProcessed
+    expr: rate(voicehive_calls_total[10m]) == 0
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "No calls being processed"
+      description: "No calls have been processed in the last 10 minutes"
+
+  # Vertex AI Service Issues
+  - alert: VertexAIHighLatency
+    expr: histogram_quantile(0.95, rate(vertex_ai_request_duration_seconds_bucket[5m])) > 10
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Vertex AI high latency"
+      description: "Vertex AI 95th percentile latency is {{ $value }}s which is above 10s threshold"
+
+  # Memory System Issues
+  - alert: MemorySystemErrors
+    expr: rate(memory_system_errors_total[5m]) > 0.1
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Memory system errors detected"
+      description: "Memory system error rate is {{ $value }} errors/sec"
+
+  # Tool Integration Failures
+  - alert: ToolIntegrationFailures
+    expr: rate(tool_integration_failures_total[5m]) > 0.05
+    for: 3m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Tool integration failures"
+      description: "Tool integration failure rate is {{ $value }} failures/sec"
+
+  # Database Connection Issues
+  - alert: DatabaseConnectionIssues
+    expr: rate(database_connection_errors_total[5m]) > 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Database connection issues"
+      description: "Database connection errors detected at {{ $value }} errors/sec"
+
+  # Disk Space Warning
+  - alert: LowDiskSpace
+    expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 20
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low disk space"
+      description: "Disk space is {{ $value }}% which is below 20% threshold"
+
+  # Critical Disk Space
+  - alert: CriticalDiskSpace
+    expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Critical disk space"
+      description: "Disk space is {{ $value }}% which is below 10% threshold"

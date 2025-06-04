@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2025-01-06T15:18:00Z",
+  "current_prompt_version": "v1.0",
+  "prompt_history": [
+    {
+      "version": "v1.0",
+      "timestamp": "2025-01-06T15:18:00Z",
+      "rationale": "Initial baseline prompt",
+      "status": "active",
+      "performance_metrics": {
+        "booking_success_rate": 0.0,
+        "customer_satisfaction": 0.0,
+        "call_resolution_rate": 0.0
+      },
+      "feedback_summary": "Baseline version - no feedback data yet"
+    }
+  ],
+  "pending_improvements": [],
+  "feedback_analysis": {
+    "common_issues": [],
+    "improvement_suggestions": [],
+    "last_analysis_date": null
+  }
+}

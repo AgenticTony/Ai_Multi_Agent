@@ -1,0 +1,29 @@
+# Allow all search engines to crawl the website
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://your-production-url.com/sitemap.xml
+
+# Disallow crawling of admin and API routes
+Disallow: /api/*
+Disallow: /admin/*
+Disallow: /_next/*
+Disallow: /*.json$
+
+# Crawl-delay parameter (requests per second)
+Crawl-delay: 10
+
+# Host directive (primary domain)
+Host: your-production-url.com
+
+# Allow all bots to index the site
+User-agent: *
+Allow: /
+
+# Disallow specific bots if needed
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
