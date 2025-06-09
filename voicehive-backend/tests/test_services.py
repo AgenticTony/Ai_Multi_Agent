@@ -2,11 +2,11 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 
-from app.services.agents.roxy_agent import RoxyAgent
-from app.services.integrations.appointment_service import AppointmentService
-from app.services.integrations.lead_service import LeadService
-from app.services.integrations.notification_service import NotificationService
-from app.models.vapi import (
+from voicehive.domains.calls.services.roxy_agent import RoxyAgent
+from voicehive.domains.appointments.services.appointment_service import AppointmentService
+from voicehive.domains.leads.services.lead_service import LeadService
+from voicehive.domains.notifications.services.notification_service import NotificationService
+from voicehive.models.vapi import (
     AppointmentRequest,
     LeadCaptureRequest,
     ConfirmationRequest,

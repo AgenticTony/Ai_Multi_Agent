@@ -1,9 +1,14 @@
+"""
+VoiceHive Lead Service
+Handles lead capture, scoring, and management
+"""
+
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 
-from app.models.vapi import LeadCaptureRequest
-from app.utils.exceptions import LeadServiceError
+from voicehive.models.vapi import LeadCaptureRequest
+from voicehive.utils.exceptions import LeadServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +50,7 @@ class LeadService:
                 "source": "voice_call",
                 "status": "new",
                 "score": self._calculate_lead_score(lead_request),
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(timezone.utc).isoformat()
             }
             
             # Store lead (in-memory for now)
@@ -131,7 +136,7 @@ class LeadService:
             
             # Update lead status
             self.leads[lead_id]["status"] = status
-            self.leads[lead_id]["updated_at"] = datetime.utcnow().isoformat()
+            self.leads[lead_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
             
             logger.info(f"Lead status updated: {lead_id} -> {status}")
             
@@ -159,7 +164,7 @@ class LeadService:
         try:
             results = []
             
-            for lead_id, lead_data in self.leads.items():
+            for _, lead_data in self.leads.items():
                 # Filter by status if provided
                 if status and lead_data["status"] != status:
                     continue

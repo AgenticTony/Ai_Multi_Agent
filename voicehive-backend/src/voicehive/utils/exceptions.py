@@ -7,21 +7,37 @@ logger = logging.getLogger(__name__)
 
 
 class VoiceHiveError(Exception):
-    """Base exception for VoiceHive application"""
-    
-    def __init__(self, message: str, error_code: Optional[str] = None, 
-                 details: Optional[Dict[str, Any]] = None, cause: Optional[Exception] = None):
+    """Base exception for VoiceHive application with user-friendly messaging"""
+
+    def __init__(
+        self,
+        message: str,
+        user_message: Optional[str] = None,
+        error_code: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
+        cause: Optional[Exception] = None
+    ):
         super().__init__(message)
-        self.message = message
+        self.message = message  # Technical message for logs
+        self.user_message = user_message or "An error occurred. Please try again."  # User-friendly message
         self.error_code = error_code or self.__class__.__name__
         self.details = details or {}
         self.cause = cause
-        
+
+    def get_user_message(self) -> str:
+        """Get user-friendly error message"""
+        return self.user_message
+
+    def get_technical_message(self) -> str:
+        """Get technical error message for logging"""
+        return self.message
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert exception to dictionary for API responses"""
         return {
             "error": self.error_code,
-            "message": self.message,
+            "message": self.user_message,  # Return user-friendly message in API
+            "technical_message": self.message,  # Include technical details for debugging
             "details": self.details
         }
 

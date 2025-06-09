@@ -1,10 +1,14 @@
+"""
+VoiceHive Notification Service
+Handles SMS, email, and other notification delivery
+"""
+
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 
-from app.models.vapi import ConfirmationRequest
-from app.config.settings import settings
-from app.utils.exceptions import NotificationServiceError
+from voicehive.models.vapi import ConfirmationRequest
+from voicehive.utils.exceptions import NotificationServiceError
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +61,7 @@ class NotificationService:
                 "email": confirmation_request.email,
                 "message": confirmation_request.message,
                 "results": results,
-                "sent_at": datetime.utcnow().isoformat()
+                "sent_at": datetime.now(timezone.utc).isoformat()
             }
             
             self.sent_notifications[notification_id] = notification_data

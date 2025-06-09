@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 import os
 
-from app.main import app
-from app.config.settings import Settings
+from voicehive.main import app
+from voicehive.core.settings import Settings
 
 
 @pytest.fixture

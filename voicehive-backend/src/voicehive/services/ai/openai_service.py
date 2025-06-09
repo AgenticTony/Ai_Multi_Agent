@@ -2,9 +2,11 @@ import logging
 from typing import List
 from openai import OpenAI
 
-from app.config.settings import settings
-from app.models.vapi import ConversationMessage
-from app.utils.exceptions import OpenAIServiceError
+from voicehive.core.settings import get_settings
+from voicehive.models.vapi import ConversationMessage
+from voicehive.utils.exceptions import OpenAIServiceError
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 

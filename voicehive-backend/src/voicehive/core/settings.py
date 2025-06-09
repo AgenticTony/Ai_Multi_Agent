@@ -1,9 +1,9 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field, validator, root_validator
-from typing import Optional, Dict, Any, List
-import os
 import logging
 from enum import Enum
+from typing import Optional, Dict, Any, List
+
+from pydantic import Field, validator, model_validator
+from pydantic_settings import BaseSettings
 
 logger = logging.getLogger(__name__)
 
@@ -142,38 +142,38 @@ class Settings(BaseSettings):
             return v.replace('\\n', '\n')
         return v
     
-    @root_validator
-    def validate_environment_specific_settings(cls, values):
+    @model_validator(mode='after')
+    def validate_environment_specific_settings(self):
         """Validate settings based on environment"""
-        environment = values.get('environment')
-        
+        environment = self.environment
+
         if environment == Environment.PRODUCTION:
             # Production-specific validations
-            if values.get('debug', False):
+            if self.debug:
                 logger.warning("Debug mode is enabled in production environment")
-            
-            if values.get('log_level') == LogLevel.DEBUG:
+
+            if self.log_level == LogLevel.DEBUG:
                 logger.warning("Debug logging is enabled in production environment")
-            
+
             # Ensure critical services are configured in production
             required_prod_settings = [
-                'secret_key',
-                'openai_api_key',
-                'vapi_api_key'
+                ('secret_key', self.secret_key),
+                ('openai_api_key', self.openai_api_key),
+                ('vapi_api_key', self.vapi_api_key)
             ]
-            
-            for setting in required_prod_settings:
-                if not values.get(setting):
-                    raise ValueError(f"{setting} is required in production environment")
-        
+
+            for setting_name, setting_value in required_prod_settings:
+                if not setting_value:
+                    raise ValueError(f"{setting_name} is required in production environment")
+
         # Validate service dependencies
-        if values.get('twilio_account_sid') and not values.get('twilio_auth_token'):
+        if self.twilio_account_sid and not self.twilio_auth_token:
             raise ValueError("twilio_auth_token is required when twilio_account_sid is provided")
-        
-        if values.get('smtp_host') and not values.get('smtp_username'):
+
+        if self.smtp_host and not self.smtp_username:
             logger.warning("SMTP host configured but no username provided")
-        
-        return values
+
+        return self
     
     @property
     def is_development(self) -> bool:

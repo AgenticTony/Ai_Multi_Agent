@@ -1,22 +1,50 @@
-import logging
-from datetime import datetime
-from typing import Dict, Any
+"""
+VoiceHive Appointment Service
+Handles appointment booking, cancellation, and availability checking
+Uses dependency injection for memory and repository services
+"""
 
-from app.models.vapi import AppointmentRequest
-from app.utils.exceptions import AppointmentServiceError
+import logging
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional
+
+from voicehive.models.vapi import AppointmentRequest
+from voicehive.utils.exceptions import AppointmentServiceError
+from voicehive.repositories.base_repository import AppointmentRepository
+from voicehive.services.memory.memory_service import MemoryServiceInterface
 
 logger = logging.getLogger(__name__)
 
 
 class AppointmentService:
-    """Service for handling appointment bookings"""
-    
-    def __init__(self):
-        # In Sprint 2, this would integrate with actual calendar systems
-        # For now, we'll use a simple in-memory store for demonstration
-        self.appointments = {}
+    """Service for handling appointment bookings with dependency injection"""
+
+    def __init__(
+        self,
+        repository: Optional[AppointmentRepository] = None,
+        memory_service: Optional[MemoryServiceInterface] = None
+    ):
+        """
+        Initialize appointment service with injected dependencies
+
+        Args:
+            repository: Repository for appointment data persistence
+            memory_service: Memory service for conversation storage
+        """
+        # Use dependency injection or fallback to default implementations
+        from voicehive.repositories.base_repository import get_repository_factory
+        from voicehive.services.memory.memory_service import UnifiedMemoryService
+
+        self.repository = repository or get_repository_factory().get_appointment_repository()
+        self.memory_service = memory_service or UnifiedMemoryService()
+
+        logger.info("AppointmentService initialized with dependency injection")
         
-    async def book_appointment(self, appointment_request: AppointmentRequest) -> Dict[str, Any]:
+    async def book_appointment(
+        self,
+        appointment_request: AppointmentRequest,
+        call_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Book an appointment
         
@@ -44,14 +72,26 @@ class AppointmentService:
                 "time": appointment_request.time,
                 "service": appointment_request.service,
                 "status": "confirmed",
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(timezone.utc).isoformat()
             }
             
-            # Store appointment (in-memory for now)
-            self.appointments[appointment_id] = appointment_data
-            
+            # Store appointment using repository
+            stored_appointment = await self.repository.create(appointment_data)
+
+            # Store conversation memory
+            await self.memory_service.store_conversation_memory(
+                session_id=call_id,
+                call_id=call_id,
+                user_name=appointment_request.name,
+                user_phone=appointment_request.phone,
+                query=f"Book appointment for {appointment_request.date} at {appointment_request.time}",
+                answer=f"Appointment confirmed for {appointment_request.name}",
+                tags=["appointment", "booking"],
+                metadata={"appointment_id": appointment_id}
+            )
+
             logger.info(f"Appointment booked: {appointment_id} for {appointment_request.name}")
-            
+
             return {
                 "appointment_id": appointment_id,
                 "status": "confirmed",
@@ -60,7 +100,11 @@ class AppointmentService:
             
         except Exception as e:
             logger.error(f"Error booking appointment: {str(e)}")
-            raise AppointmentServiceError(f"Failed to book appointment: {str(e)}")
+            raise AppointmentServiceError(
+                message=f"Failed to book appointment: {str(e)}",
+                user_message=f"I couldn't book your appointment for {appointment_request.date}. Please try again or let me transfer you to someone who can help.",
+                details={"appointment_request": appointment_request.dict()}
+            ) from e
     
     async def check_availability(self, date: str, time: str) -> bool:
         """
@@ -126,7 +170,8 @@ class AppointmentService:
             
             # Update appointment status
             self.appointments[appointment_id]["status"] = "cancelled"
-            self.appointments[appointment_id]["cancelled_at"] = datetime.utcnow().isoformat()
+            cancelled_at = datetime.now(timezone.utc).isoformat()
+            self.appointments[appointment_id]["cancelled_at"] = cancelled_at
             
             logger.info(f"Appointment cancelled: {appointment_id}")
             

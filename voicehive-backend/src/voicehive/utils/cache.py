@@ -8,7 +8,9 @@ from functools import wraps
 import hashlib
 import json
 from datetime import datetime, timedelta
-from app.config.settings import settings
+from voicehive.core.settings import get_settings
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,12 @@ version = "1.0.0"
 description = "VoiceHive AI Voice Agent Backend Service"
 authors = ["VoiceHive Team <team@voicehive.com>"]
 readme = "README.md"
-packages = [{include = "voicehive", from = "src"}]
+packages = [
+    {include = "voicehive", from = "src"},
+    {include = "memory"},
+    {include = "monitoring"},
+    {include = "tools"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -22,6 +27,8 @@ mem0ai = "^0.0.11"
 twilio = "^8.10.0"
 firebase-admin = "^6.2.0"
 psutil = "^5.9.0"
+numpy = "^1.24.0"
+scipy = "^1.11.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
@@ -67,7 +74,7 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 100
-known_first_party = ["voicehive"]
+known_first_party = ["voicehive", "memory", "monitoring", "tools"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -90,7 +97,9 @@ module = [
     "twilio.*",
     "firebase_admin.*",
     "google.cloud.*",
-    "psutil.*"
+    "psutil.*",
+    "numpy.*",
+    "scipy.*"
 ]
 ignore_missing_imports = true
 
@@ -109,7 +118,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src/voicehive"]
+source = ["src/voicehive", "memory", "monitoring", "tools"]
 omit = [
     "*/tests/*",
     "*/test_*",

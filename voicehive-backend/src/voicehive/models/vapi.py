@@ -1,6 +1,12 @@
-from pydantic import BaseModel, Field
+"""
+VoiceHive VAPI Models
+Data models for Vapi.ai webhook integration and call handling
+"""
+
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
-from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class VapiMessage(BaseModel):
@@ -50,7 +56,7 @@ class FunctionCallResponse(BaseModel):
 class AppointmentRequest(BaseModel):
     """Appointment booking request"""
     name: str = Field(..., min_length=1, max_length=100)
-    phone: str = Field(..., regex=r'^\+?[\d\s\-\(\)]+$')
+    phone: str = Field(..., pattern=r'^\+?[\d\s\-\(\)]+$')
     date: str = Field(..., description="Date in YYYY-MM-DD format")
     time: str = Field(..., description="Time in HH:MM AM/PM format")
     service: Optional[str] = Field(default="consultation", max_length=100)
@@ -59,15 +65,15 @@ class AppointmentRequest(BaseModel):
 class LeadCaptureRequest(BaseModel):
     """Lead capture request"""
     name: str = Field(..., min_length=1, max_length=100)
-    phone: str = Field(..., regex=r'^\+?[\d\s\-\(\)]+$')
-    email: Optional[str] = Field(default=None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    phone: str = Field(..., pattern=r'^\+?[\d\s\-\(\)]+$')
+    email: Optional[str] = Field(default=None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
     interest: Optional[str] = Field(default=None, max_length=500)
 
 
 class ConfirmationRequest(BaseModel):
     """Confirmation sending request"""
-    phone: Optional[str] = Field(default=None, regex=r'^\+?[\d\s\-\(\)]+$')
-    email: Optional[str] = Field(default=None, regex=r'^[^@]+@[^@]+\.[^@]+$')
+    phone: Optional[str] = Field(default=None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    email: Optional[str] = Field(default=None, pattern=r'^[^@]+@[^@]+\.[^@]+$')
     message: str = Field(..., min_length=1, max_length=1000)
 
 
@@ -79,14 +85,14 @@ class TransferRequest(BaseModel):
 
 class ConversationMessage(BaseModel):
     """Individual conversation message"""
-    role: str = Field(..., regex=r'^(user|assistant|system)$')
+    role: str = Field(..., pattern=r'^(user|assistant|system)$')
     content: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ConversationHistory(BaseModel):
     """Conversation history for a call"""
     call_id: str
     messages: List[ConversationMessage] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -27,36 +27,36 @@ test:
 	poetry run pytest -v tests/
 
 test-cov:
-	poetry run pytest --cov=app --cov-report=html --cov-report=term-missing tests/
+	poetry run pytest --cov=src/voicehive --cov-report=html --cov-report=term-missing tests/
 
 test-watch:
 	poetry run pytest-watch -- tests/
 
 # Code quality
 lint:
-	poetry run flake8 app tests
-	poetry run mypy app
+	poetry run flake8 src/voicehive tests
+	poetry run mypy src/voicehive
 
 format:
-	poetry run black app tests
-	poetry run isort app tests
+	poetry run black src/voicehive tests
+	poetry run isort src/voicehive tests
 
 check-style:
-	poetry run black --check app tests
-	poetry run isort --check-only app tests
-	poetry run flake8 app tests
+	poetry run black --check src/voicehive tests
+	poetry run isort --check-only src/voicehive tests
+	poetry run flake8 src/voicehive tests
 
 # Security
 security:
-	poetry run bandit -r app/
+	poetry run bandit -r src/voicehive/
 	poetry run safety check
 
 # Development server
 run-dev:
-	poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	poetry run uvicorn voicehive.main:app --reload --host 0.0.0.0 --port 8000
 
 run-prod:
-	poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+	poetry run uvicorn voicehive.main:app --host 0.0.0.0 --port 8000
 
 # Docker operations
 build-docker:
